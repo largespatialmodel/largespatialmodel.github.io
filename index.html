@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Feature 3DGS: Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields">
+  <meta name="keywords" content="Feature, 3DGS, 3D Gaussian Splatting, Distillation, Radiance Fields, Feature Fields">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/x-icon" href="/feature-3dgs.github.io/media/pipeline.png">
+  
+  <title>Feature 3DGS: Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script> -->
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <!-- custom additional scripts -->
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- https://docs.mathjax.org/en/latest/web/configuration.html#configuration-using-an-in-line-script -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
+
+  <script
+  defer
+  src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"
+  />
+
+  <!-- swiper -->
+  <!-- https://swiperjs.com/demos -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+  <link rel="image_src" href="./media/pipeline.png">
+  
+  <!-- img comparison slider -->
+  <!-- https://github.com/sneas/img-comparison-slider -->
+  <style>
+    .before,
+    .after {
+      margin: 0;
+    }
+  
+    .before figcaption,
+    .after figcaption {
+      background: #fff;
+      border: 1px solid #c0c0c0;
+      border-radius: 4px;
+      color: #2e3452;
+      opacity: 0.8;
+      padding: 4px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      line-height: 70%;
+    }
+  
+    .before figcaption {
+      left: 4px;
+    }
+  
+    .after figcaption {
+      right: 4px;
+    }
+  </style>
+
+<style>
+  .button-container_teaser {
+      display: flex;       
+      justify-content: center; 
+      align-items: center;
+  }
+
+  .glow-button {
+      position: relative;
+      display: inline-block;
+      padding: 2px;
+      border-radius: 10px;
+      z-index: 0;
+      margin-bottom: 15px;
+  }
+
+  .glow-button button {
+      background: transparent; 
+      border: none; 
+      color: white; 
+      padding: 5px 10px; 
+      font-size: 16px; 
+      border-radius: 10px; 
+      cursor: pointer; 
+      outline: none; 
+  }
+
+  .glow-button:before {
+      content: "";
+      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      background-size: 400%;
+      z-index: -1;
+      filter: blur(5px);
+      -webkit-filter: blur(5px);
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      animation: glowing-button-85 20s linear infinite;
+      transition: opacity 0.3s ease-in-out;
+      border-radius: 10px;
+  }
+
+  @keyframes glowing-button-85 {
+      0% { background-position: 0 0; }
+      50% { background-position: 400% 0; }
+      100% { background-position: 0 0; }
+  }
+
+  .glow-button:after {
+      z-index: -1;
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #222;
+      left: 0;
+      top: 0;
+      border-radius: 10px;
+  }
+</style>
+
+<style>
+  .container_teaser {
+      display: flex; /* Enables Flexbox */
+      justify-content: center; /* Horizontally centers the content */
+      align-items: center; /* Vertically centers the content */
+      height: 100%; /* Set the height of the container */
+  }
+
+  .column_teaser {
+      flex: 0 0 auto; /* This ensures that the column doesn't grow or shrink */
+      width: 100%; /* Adjust this width as needed */
+      max-width: 800px; /* Adjust this max-width as needed */
+      margin: 0 auto; /* Centers the column within the container */
+  }
+</style>
+  <script
+  defer
+  src="./static/js/image-comparison-slider.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    href="./static/css/image-comparison-slider.css"
+  />
+
+</head>
+<body>
+</head>
+<body>
+
+<!-- <nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://keunhong.com">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://hypernerf.github.io">
+            HyperNeRF
+          </a>
+          <a class="navbar-item" href="https://nerfies.github.io">
+            Nerfies
+          </a>
+          <a class="navbar-item" href="https://latentfusion.github.io">
+            LatentFusion
+          </a>
+          <a class="navbar-item" href="https://photoshape.github.io">
+            PhotoShape
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav> -->
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <!-- <h1 class="title is-1 publication-title">Feature 3DGS: Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields</h1> -->
+          <h1 class="title is-1 publication-title">Feature 3DGS 🪄</h1>
+          <h1 class="title is-2 publication-title">Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields</h1>
+            <style>
+              .author-block {
+                  margin-right: 10px;
+              }
+            </style>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://ShijieZhou-UCLA.github.io/">Shijie Zhou</a><sup>1</sup>,</span>
+              <span class="author-block">
+                <a href="">Haoran Chang</a><sup>1*</sup>,</span>
+              <span class="author-block">
+                <a href="">Sicheng Jiang</a><sup>1*</sup>,</span>
+              <span class="author-block">
+                <a href="https://zhiwenfan.github.io/">Zhiwen Fan</a><sup>2</sup>,</span>
+              <span class="author-block"> 
+                <a href="https://zehaozhu.github.io/">Zehao Zhu</a><sup>2</sup>,</span>
+              <span class="author-block"> 
+                <a href="https://ir1d.github.io/">Dejia Xu</a><sup>2</sup>,</span>
+              <span class="author-block">
+                <a href="https://pradyumnachari.github.io/">Pradyumna Chari</a><sup>1</sup>,</span>
+              <span class="author-block">   
+                <a href="https://scholar.google.com/citations?user=LkpA-L0AAAAJ&hl=en">Suya You</a><sup>3</sup>,</span>
+              <span class="author-block"> 
+                <a href="https://www.ece.utexas.edu/people/faculty/atlas-wang">Zhangyang Wang</a><sup>2</sup>,</span>
+              <span class="author-block">                             
+                <a href="https://www.ee.ucla.edu/achuta-kadambi/">Achuta Kadambi</a><sup>1</sup>
+              </span>
+            </div>
+
+          <!-- <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>University of California, Los Angeles</span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>2</sup>University of Texas at Austin</span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>3</sup>DEVCOM Army Research Laboratory</span>
+          </div> -->
+          <style>
+            .univerity-block {
+                margin-right: 14px;
+            }
+          </style>
+          <div class="is-size-5 publication-authors">
+            <span class="univerity-block"><sup>1</sup>University of California, Los Angeles</span>
+            <span class="univerity-block"><sup>2</sup>University of Texas at Austin</span>
+            <span class="univerity-block"><sup>3</sup>DEVCOM ARL</span>
+          </div>
+
+          <div class="is-size-6 publication-authors">
+            <span class="author-block">*Denotes Equal Contribution</span>
+          </div>
+
+          <!-- <div class="is-size-4 publication-authors">
+            <span class="univerity-block"><b>CVPR 2024, Seattle</b></span>
+            <span class="univerity-block">CVPR 2024, Seattle</span>
+            <a href="https://cvpr.thecvf.com/">CVPR 2024, Seattle</a>
+          </div> -->
+
+          <div class="is-size-5 publication-authors">
+            <span class="univerity-block" style="color: rgb(169, 16, 151);">CVPR 2024, Seattle</span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="univerity-block" style="color: rgb(252, 118, 0);"><b>✨ Highlight ✨</b> </span>
+          </div>
+          
+          <!-- <div class="is-size-5 publication-authors">
+            <span class="univerity-block" style="color: rgb(169, 16, 151);">CVPR 2024, Seattle</span>
+          </div> -->
+        
+          <!-- <div class="is-size-5 publication-authors">
+          <body>
+            <center>
+                <h1>
+                    <font color="#FF2626"><b>H</b></font>
+                    <font color="#252A34"><b>i</b></font>
+                    <font color="#753422"><b>g</b></font>
+                    <font color="#FFD523"><b>h</b></font>
+                    <font color="#71EFA3"><b>l</b></font>
+                    <font color="#0F52BA"><b>i</b></font>
+                    <font color="#66CC66"><b>g</b></font>
+                    <font color="#FF9966"><b>h</b></font>
+                    <font color="#FFCCCC"><b>t</b></font>
+                    <font color="#00C1D4">k</font>
+                    <font color="#EFE3D0">s</font>
+                </h1>
+            </center>
+          </body>
+          </div> -->
+        
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2312.03203"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=h4zmQsCV_Qw"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/ShijieZhou-UCLA/feature-3dgs"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container_teaser is-max-desktop">
+    <div class="column_teaser">
+        <!-- First Slider -->
+        <div id="slider1-container_teaser">
+            <img-comparison-slider id="slider1">
+                <figure slot="first" class="before">
+                    <img height="100%" width="100%" src="./media/teaser/rgb1.gif">
+                    <figcaption>Radiance Field </figcaption>
+                </figure>
+                <figure slot="second" class="after" id="gif-2">
+                    <img height="100%" width="100%" src="./media/teaser/lseg.gif">
+                    <figcaption>Distilled Feature Field (LSeg)</figcaption>
+                </figure>
+            </img-comparison-slider>
+        </div>
+
+        <!-- Second Slider, initially hidden -->
+        <div id="slider2-container_teaser" style="display: none;">
+            <img-comparison-slider id="slider2">
+                <figure slot="first" class="before" id="gif-3">
+                    <img height="100%" width="100%" src="./media/teaser/rgb2.gif">
+                    <figcaption>Radiance Field </figcaption>
+                </figure>
+                <figure slot="second" class="after" id="gif-4">
+                    <img height="100%" width="100%" src="./media/teaser/sam.gif">
+                    <figcaption>Distilled Feature Field (SAM)</figcaption>
+                </figure>
+            </img-comparison-slider>
+        </div>
+        <div class="button-container_teaser">
+          <div class="glow-button">
+              <button id="toggle-slider" onclick="toggleSliders()">Switch Feature Field 🪄</button>
+          </div>
+      </div>
+        <h2 class="subtitle has-text-centered">
+          Feature 3DGS enables the distillation of 3D feature fields from any 2D foundation models, using only 18 training views for this complex real-world scene.
+        </h2>        
+    </div>
+</div>
+
+    <!-- <div class="hero-body">
+      <video id="teaser" autoplay muted loop playsinline height="100%">
+        <source src="./static/videos/teaser.mp4"
+                type="video/mp4">
+      </video>
+      <h2 class="subtitle has-text-centered">
+        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into
+        free-viewpoint
+        portraits.
+      </h2>
+    </div>
+  </div> -->
+</section>
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            3D scene representations have gained immense popularity in recent years. Methods that use Neural Radiance fields are versatile for traditional tasks such as novel view synthesis. 
+            In recent times, some work has emerged that aims to extend the functionality of NeRF beyond view synthesis, for semantically aware tasks such as editing and segmentation using 3D feature field distillation from 2D foundation models. 
+            However, these methods have two major limitations: (a) they are limited by the rendering speed of NeRF pipelines, and (b) implicitly represented feature fields suffer from continuity artifacts reducing feature quality. 
+            Recently, 3D Gaussian Splatting has shown state-of-the-art performance on real-time radiance field rendering. In this work, we go one step further: in addition to radiance field rendering, 
+            we enable 3D Gaussian splatting on arbitrary-dimension semantic features via 2D foundation model distillation. This translation is not straightforward: naively incorporating feature fields in the 3DGS framework encounters significant challenges, 
+            notably the disparities in spatial resolution and channel consistency between RGB images and feature maps. We propose architectural and training changes to efficiently avert this problem. Our proposed method is general, and our experiments showcase novel view semantic segmentation, 
+            language-guided editing and segment anything through learning feature fields from state-of-the-art 2D foundation models such as SAM and CLIP-LSeg. Across experiments, our distillation method is able to provide comparable or better results, while being significantly faster to both train and render. 
+            Additionally, to the best of our knowledge, we are the first method to enable point and bounding-box prompting for radiance field manipulation, by leveraging the SAM model.
+          </p>
+          
+          <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+              <h2 class="title is-3">Video</h2>
+              <div class="publication-video">
+                <iframe src="https://www.youtube.com/embed/h4zmQsCV_Qw?si=Bd1LWETR_c8Uxarf"
+                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+          </div>
+          <!--/ Paper video. -->
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Pipeline. -->
+    <!-- <h3 class="title is-4">Methodology</h3>
+    <div class="content has-text-justified">
+      <p>
+      </p>
+    </div>
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <img src="./media/pipeline.png"
+             class="interpolation-image"
+             alt="Interpolate start reference image."/>
+        <p>...</p>
+      </div>
+    </div> -->
+    <!--/ Pipeline. -->
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Approach</h2>
+    <div class="content has-text-justified">
+      <div class="columns is-centered">
+        <figure class="image is-centered">
+          <img src="./media/pipeline/Pipline.jpg" alt="Pipeline Image">
+        </figure>
+      </div>
+      <p>
+        We adopt the same 3D Gaussian initialization from sparse SfM point clouds as utilized in 3DGS,
+        with the addition of an essential attribute: the <i>semantic feature</i>. Our primary innovation lies in the development
+        of a Parallel N-dimensional Gaussian Rasterizer, complemented by a convolutional speed-up module as an optional branch.
+        This configuration is adept at rapidly rendering arbitrarily high-dimensional features without sacrificing downstream performance. <br> <br>
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h3 class="title is-3">3D Semantic Scene Understanding</h3>
+    <div class="content has-text-justified">
+    <p>
+      Feature 3DGS empowers pixel-wise semantic scene understanding from any novel view, even with unseen labels, by mapping semantically 
+      close labels to similar regions in the embedding space of 2D foundation models. <br> 
+    </p>
+    </div>
+    <div class="columns is-centered">
+
+      <div class="column">
+        <h2 class="title is-6">Synthetic Scene</h2>
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/semantic_seg/scene_1_rgb.gif">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/semantic_seg/scene_1_seg.gif">
+          </img-comparison-slider>
+        </div>
+      </div>
+
+      <div class="column">
+        <h2 class="title is-6">Real Scene</h2>
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/semantic_seg/scene_2_rgb.gif">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/semantic_seg/scene_2_seg.gif">
+          </img-comparison-slider>
+        </div>
+      </div>
+
+      
+      <!--/ Matting. -->
+    <!-- </div>
+    <div class="columns is-centered"> -->
+
+      <!-- <div class="column">
+        <h2 class="title is-6">Rearrange</h2>
+        <div class="columns is-centered">
+          <div class="column content">
+            <video id="matting-video" autoplay controls muted loop playsinline height="100%">
+              <source src="./media/editing/edit_scene_rearrange.mp4"
+              type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+
+      <div class="column">
+        <h2 class="title is-6">Editing</h2>
+        <div class="columns is-centered">
+          <div class="column content">
+            <video id="matting-video" autoplay controls muted loop playsinline height="100%">
+              <source src="./media/editing/edit_scene_editing.mp4"
+              type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div> -->
+
+      
+      <!--/ Matting. -->
+    </div>
+    <div class="content has-text-justified">
+      <p>
+        <i>Experience sync issues with the GIFs? Simply refresh the webpage to synchronize playback.</i>
+      </p>
+    </div>
+
+    <style>
+      .before,
+      .after {
+        margin: 0;
+      }
+    
+      .before figcaption,
+      .after figcaption {
+        background: #fff;
+        border: 1px solid #c0c0c0;
+        border-radius: 4px;
+        color: #2e3452;
+        opacity: 0.8;
+        padding: 4px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        line-height: 100%;
+      }
+    
+      .before figcaption {
+        left: 4px;
+      }
+    
+      .after figcaption {
+        right: 4px;
+      }
+    </style>
+  </div>
+</section>
+
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h3 class="title is-3">Language-guided Editing</h3>
+    <div class="content has-text-justified">
+    <p>
+      The nature of explicit scene representation, coupled with feature fields, enables precise geometry and appearance editing 
+      in 3D for any real-world scene prompted by natural language. <br> 
+    </p>
+    </div>
+    <div class="columns is-centered">
+
+      <div class="column">
+        <h2 class="title is-6">Delete the car</h2>
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/language_editing/deletion/deletion_rgb.gif">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/language_editing/deletion/deletion.gif">
+          </img-comparison-slider>
+        </div>
+      </div>
+
+      <div class="column">
+        <h2 class="title is-6">Extract the banana</h2>
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/language_editing/extraction/extraction_rgb.gif">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/language_editing/extraction/extraction.gif">
+          </img-comparison-slider>
+        </div>
+      </div>
+      
+      <div class="column">
+        <h2 class="title is-6">Change leaves color</h2>
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/language_editing/color_changing/color_change_rgb_0.gif">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/language_editing/color_changing/color_change_0.gif">
+          </img-comparison-slider>
+        </div>
+      </div>
+
+      <div class="column">
+        <h2 class="title is-6">Change sidewalk color</h2>
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/language_editing/color_changing/color_change_rgb_1_2.gif">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/language_editing/color_changing/color_change_1.gif">
+          </img-comparison-slider>
+        </div>
+      </div>
+      
+      <!--/ Matting. -->
+    </div>
+    <div class="content has-text-justified">
+      <p>
+        <i>Experience sync issues with the GIFs? Simply refresh the webpage to synchronize playback.</i>
+      </p>
+    </div>
+
+    <style>
+      .before,
+      .after {
+        margin: 0;
+      }
+    
+      .before figcaption,
+      .after figcaption {
+        background: #fff;
+        border: 1px solid #c0c0c0;
+        border-radius: 4px;
+        color: #2e3452;
+        opacity: 0.8;
+        padding: 4px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        line-height: 100%;
+      }
+    
+      .before figcaption {
+        left: 4px;
+      }
+    
+      .after figcaption {
+        right: 4px;
+      }
+    </style>
+  </div>
+</section>   
+
+
+
+
+<section class="section">
+    <div class="container is-max-desktop">
+    <h3 class="title is-3">Segment Anything from Any View</h3>
+    <div class="content has-text-justified">
+    <p>
+      To segment anything in a 3D scene, a few training view images is all you need. 
+      We seamlessly integrate the latest computer vision foundation model, Segment Anything Model (SAM), 
+      into the novel view synthesis pipeline through feature field distillation. This integration enables swift and precise 
+      responses without invoking the original SAM workflow. <br>
+    </p>
+    </div>
+    <div class="columns is-centered">
+      <!-- Visual Effects. -->
+      <div class="column">
+        <div class="content">
+          <h2 class="title is-6">Segment by Point</h2>
+          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+            <source src="./media/sam/teatime_point.mp4"
+            type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <!--/ Visual Effects. -->
+
+      <!-- Matting. -->
+      <div class="column">
+        <h2 class="title is-6">Segment by Box</h2>
+        <div class="columns is-centered">
+          <div class="column content">
+            <video id="matting-video" autoplay controls muted loop playsinline height="100%">
+              <source src="./media/sam/teatime_box.mp4"
+              type="video/mp4">
+            </video>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="column">
+        <h2 class="title is-6">Segment Everything</h2>
+        <div class="columns is-centered">
+          <div class="column content">
+            <video id="matting-video" autoplay controls muted loop playsinline height="100%">
+              <source src="./media/sam/teatime_all.mp4"
+              type="video/mp4">
+            </video>
+          </div>
+
+        </div>
+      </div>
+
+    
+
+
+      
+      <!--/ Matting. -->
+    </div>
+
+    <style>
+      .before,
+      .after {
+        margin: 0;
+      }
+    
+      .before figcaption,
+      .after figcaption {
+        background: #fff;
+        border: 1px solid #c0c0c0;
+        border-radius: 4px;
+        color: #2e3452;
+        opacity: 0.8;
+        padding: 4px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        line-height: 100%;
+      }
+    
+      .before figcaption {
+        left: 4px;
+      }
+    
+      .after figcaption {
+        right: 4px;
+      }
+    </style>
+  </div>
+</section>
+
+
+
+
+
+
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{zhou2023feature,
+  author    = {Zhou, Shijie and Chang, Haoran and Jiang, Sicheng and Fan, Zhiwen and Zhu, Zehao and Xu, Dejia and Chari, Pradyumna and You, Suya and Wang, Zhangyang and Kadambi, Achuta},
+  title     = {Feature 3DGS: Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields},
+  journal   = {arXiv preprint arXiv:2312.03203},
+  year      = {2023},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Source code borrowed from <a
+              href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleSliders() {
+      // Get both slider containers
+      var slider1 = document.getElementById("slider1-container_teaser");
+      var slider2 = document.getElementById("slider2-container_teaser");
+
+      // Toggle visibility
+      if (slider1.style.display === "none") {
+          slider1.style.display = "block";
+          slider2.style.display = "none";
+      } else {
+          slider1.style.display = "none";
+          slider2.style.display = "block";
+      }
+  }
+</script>
+
+</body>
+</html>
