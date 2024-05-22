@@ -1,921 +1,226 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
-  <meta name="description"  
-        content="Large Scene Model: Real-time Unposed Images to Semantic 3D">
-  <meta name="keywords" content="Feature, 3DGS, 3D Gaussian Splatting, Distillation, Radiance Fields, Feature Fields">
+  <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
+  <!-- Replace the content tag with appropriate information -->
+  <meta name="description"
+    content="We introduce pixelSplat, a feed-forward model that learns to reconstruct 3D radiance fields parameterized by 3D Gaussian primitives from pairs of images.">
+  <meta property="og:title" content="Large Scene Model: Real-time Unposed Images to Semantic 3D" />
+  <meta property="og:description" content="Novel view synthesis via feed-forward 3D Gaussian inference from two images." />
+  <meta property="og:url" content="https://pixelsplat.github.io/" />
+  <meta property="og:image" content="https://pixelsplat.github.io/static/images/banner.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:title" content="Large Scene Model: Real-time Unposed Images to Semantic 3D">
+  <meta name="twitter:description" content="Novel view synthesis via feed-forward 3D Gaussian inference from two images.">
+  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
+  <meta name="twitter:image" content="https://pixelsplat.github.io/static/images/banner.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- Keywords for your paper to be indexed by-->
+  <meta name="keywords" content="NeRF, novel view synthesis, 3D Gaussians">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="icon" type="image/x-icon" href="/feature-3dgs.github.io/media/pipeline.png">
-  
-  <title>Feature 3DGS: Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields</title>
+  <title>Large Scene Model</title>
+  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
 
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
+  <link rel="stylesheet" href="static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
 
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-
-    gtag('js', new Date());
-
-    gtag('config', 'G-PYVRSFMDRL');
-  </script> -->
-
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
-        rel="stylesheet">
-
-  <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
-  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="./static/css/index.css">
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="./static/js/fontawesome.all.min.js"></script>
-  <script src="./static/js/bulma-carousel.min.js"></script>
-  <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js"></script>
-
-  <!-- custom additional scripts -->
-
-  <link rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- https://docs.mathjax.org/en/latest/web/configuration.html#configuration-using-an-in-line-script -->
-  <script>
-    MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']]
-      },
-      svg: {
-        fontCache: 'global'
-      }
-    };
-  </script>
-  <script type="text/javascript" id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-  </script>
-
-  <script
-  defer
-  src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"
-  />
-
-  <!-- swiper -->
-  <!-- https://swiperjs.com/demos -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-
-  <link rel="image_src" href="./media/pipeline.png">
-  
-  <!-- img comparison slider -->
-  <!-- https://github.com/sneas/img-comparison-slider -->
-  <style>
-    .before,
-    .after {
-      margin: 0;
-    }
-
-    .summary-box {
-    background-color: #ffb682; /* Light blue background */
-    /* border-left: 5px solid #2b8af7; Dark blue left border */
-    padding: 10px;
-    margin: 10px 0;
-    font-family: Arial, sans-serif;
-    border-radius: 5px; /* Rounds the corners */
-    border: 2px solid #FFA500; /* Fine orange border */
-    }
-
-    p {
-        margin: 0;
-        color: #333; /* Dark text for better readability */
-    }
-    .before figcaption,
-    .after figcaption {
-      background: #fff;
-      border: 1px solid #c0c0c0;
-      border-radius: 4px;
-      color: #2e3452;
-      opacity: 0.8;
-      padding: 4px;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      line-height: 70%;
-    }
-  
-    .before figcaption {
-      left: 4px;
-    }
-  
-    .after figcaption {
-      right: 4px;
-    }
-  </style>
-
-<style>
-  .button-container_teaser {
-      display: flex;       
-      justify-content: center; 
-      align-items: center;
-  }
-
-  .glow-button {
-      position: relative;
-      display: inline-block;
-      padding: 2px;
-      border-radius: 10px;
-      z-index: 0;
-      margin-bottom: 15px;
-  }
-
-  .glow-button button {
-      background: transparent; 
-      border: none; 
-      color: white; 
-      padding: 5px 10px; 
-      font-size: 16px; 
-      border-radius: 10px; 
-      cursor: pointer; 
-      outline: none; 
-  }
-
-  .glow-button:before {
-      content: "";
-      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      background-size: 400%;
-      z-index: -1;
-      filter: blur(5px);
-      -webkit-filter: blur(5px);
-      width: calc(100% + 4px);
-      height: calc(100% + 4px);
-      animation: glowing-button-85 20s linear infinite;
-      transition: opacity 0.3s ease-in-out;
-      border-radius: 10px;
-  }
-
-  @keyframes glowing-button-85 {
-      0% { background-position: 0 0; }
-      50% { background-position: 400% 0; }
-      100% { background-position: 0 0; }
-  }
-
-  .glow-button:after {
-      z-index: -1;
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: #222;
-      left: 0;
-      top: 0;
-      border-radius: 10px;
-  }
-</style>
-
-<style>
-  .container_teaser {
-      display: flex; /* Enables Flexbox */
-      justify-content: center; /* Horizontally centers the content */
-      align-items: center; /* Vertically centers the content */
-      height: 100%; /* Set the height of the container */
-  }
-
-  .column_teaser {
-      flex: 0 0 auto; /* This ensures that the column doesn't grow or shrink */
-      width: 100%; /* Adjust this width as needed */
-      max-width: 800px; /* Adjust this max-width as needed */
-      margin: 0 auto; /* Centers the column within the container */
-  }
-</style>
-  <script
-  defer
-  src="./static/js/image-comparison-slider.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    href="./static/css/image-comparison-slider.css"
-  />
-
+  <!-- <script src="https://documentcloud.adobe.com/view-sdk/main.js"></script> -->
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script src="static/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
-</head>
-<body>
 
-<!-- <nav class="navbar" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
-  </div>
-  <div class="navbar-menu">
-    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
-      <a class="navbar-item" href="https://keunhong.com">
-      <span class="icon">
-          <i class="fas fa-home"></i>
-      </span>
+<body>
+  <div class="container">
+    <!-- Title -->
+    <!-- <h1 class="pt-5 title">pixelSplat: 3D Gaussian Splats from Image Pairs for Scalable
+      Generalizable 3D Reconstruction</h1> -->
+      <h1 class="pt-5 title"><span style="color: #ff7512;font-weight: bolder;">L</span>arge<span style="color: #ff7512;font-weight: bolder;">S</span>cene<span style="color: #ff7512;font-weight: bolder;">M</span>odel: Real-time Unposed Images to Semantic 3D</h1>
+    <div class="d-flex flex-row justify-content-center">
+      <a>Anonymous Authors</a>
+    </div>
+
+
+
+    <!-- <div class="w-100 d-flex flex-row justify-content-center mt-4 gap-2"> -->
+      <!-- Paper PDF -->
+      <!-- <a href="https://arxiv.org/abs/2312.12337" target="_blank" class="btn btn-dark" role="button">
+        <span class="icon">
+          <i class="ai ai-arxiv"></i>
+        </span>
+        <span>Paper</span>
+      </a> -->
+
+      <!-- Code -->
+      <!-- <a href="https://github.com/dcharatan/pixelsplat" target="_blank" class="btn btn-dark" role="button">
+        <span class="icon">
+          <i class="fab fa-github"></i>
+        </span>
+        <span>Code</span>
+      </a> -->
+
+      <!-- Pre-trained Models -->
+      <!-- <a href="https://drive.google.com/drive/folders/18nGNWIn8RN0aEWLR6MC2mshAkx2uN6fL?usp=sharing" target="_blank" class="btn btn-dark" role="button">
+        <span class="icon">
+          <i class="fas fa-database"></i>
+        </span>
+        <span>Pre-trained Models</span>
+      </a> -->
+
+      <!-- Sample Data -->
+      <!-- <a href="https://drive.google.com/drive/folders/1joiezNCyQK2BvWMnfwHJpm2V77c7iYGe?usp=sharing" target="_blank" class="btn btn-dark" role="button">
+        <span class="icon">
+          <i class="fas fa-database"></i>
+        </span>
+        <span>Sample Data</span>
       </a>
+    </div> -->
 
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          More Research
-        </a>
-        <div class="navbar-dropdown">
-          <a class="navbar-item" href="https://hypernerf.github.io">
-            HyperNeRF
-          </a>
-          <a class="navbar-item" href="https://nerfies.github.io">
-            Nerfies
-          </a>
-          <a class="navbar-item" href="https://latentfusion.github.io">
-            LatentFusion
-          </a>
-          <a class="navbar-item" href="https://photoshape.github.io">
-            PhotoShape
-          </a>
-        </div>
+    <!-- Teaser -->
+    <div class="w-100 my-4">
+      <img src="static/images/teaser.png" class="img-fluid w-100 mt-2 mb-3" alt="comparison on ACID dataset" />
+      <!-- <video class="w-100 d-block" autoplay controls muted loop>
+        <source src="static/videos/teaser.mp4" type="video/mp4">
+      </video> -->
+      <div class="alert alert-primary tldr mb-4">
+        <strong>TL;DR</strong>: LSM utilizez two unposed and uncalibrated images as input, and reconstructs the explicit radiance field, encompassing geometry, appearance, and semantics in real-time.
       </div>
     </div>
 
-  </div>
-</nav> -->
-
-<!-- f06d15 -->
-<!-- ff7512 -->
-<section class="hero"> 
-  <div class="hero-body">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-          <!-- <h1 class="title is-1 publication-title">Feature 3DGS: Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields</h1> -->
-          <h1 class="title is-1 publication-title"><span style="color: #ff7512;font-weight: bolder;">L</span>arge<span style="color: #ff7512;font-weight: bolder;">S</span>cene<span style="color: #ff7512;font-weight: bolder;">M</span>odel: Real-time Unposed Images to Semantic 3D</h1>
-          <div class="is-size-5 publication-authors">
-            <span class="author-block">
-              <a>Anonymous Authors</a>
-          <!-- <h1 class="title is-2 publication-title">Real-time Unposed Images to Semantic 3D🪄</h1> -->
-            <!-- <style>
-              .author-block {
-                  margin-right: 10px;
-              }
-            </style> -->
-            <!-- <div class="is-size-5 publication-authors">
-              <span class="author-block">
-                <a href="https://ShijieZhou-UCLA.github.io/">Shijie Zhou</a><sup>1</sup>,</span>
-              <span class="author-block">
-                <a href="">Haoran Chang</a><sup>1*</sup>,</span>
-              <span class="author-block">
-                <a href="">Sicheng Jiang</a><sup>1*</sup>,</span>
-              <span class="author-block">
-                <a href="https://zhiwenfan.github.io/">Zhiwen Fan</a><sup>2</sup>,</span>
-              <span class="author-block"> 
-                <a href="https://zehaozhu.github.io/">Zehao Zhu</a><sup>2</sup>,</span>
-              <span class="author-block"> 
-                <a href="https://ir1d.github.io/">Dejia Xu</a><sup>2</sup>,</span>
-              <span class="author-block">
-                <a href="https://pradyumnachari.github.io/">Pradyumna Chari</a><sup>1</sup>,</span>
-              <span class="author-block">   
-                <a href="https://scholar.google.com/citations?user=LkpA-L0AAAAJ&hl=en">Suya You</a><sup>3</sup>,</span>
-              <span class="author-block"> 
-                <a href="https://www.ece.utexas.edu/people/faculty/atlas-wang">Zhangyang Wang</a><sup>2</sup>,</span>
-              <span class="author-block">                             
-                <a href="https://www.ee.ucla.edu/achuta-kadambi/">Achuta Kadambi</a><sup>1</sup>
-              </span>
-            </div> -->
-
-          <!-- <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>1</sup>University of California, Los Angeles</span>
-          </div>
-          <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>2</sup>University of Texas at Austin</span>
-          </div>
-          <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>3</sup>DEVCOM Army Research Laboratory</span>
-          </div> -->
-          <!-- <style>
-            .univerity-block {
-                margin-right: 14px;
-            }
-          </style> -->
-          <!-- <div class="is-size-5 publication-authors">
-            <span class="univerity-block"><sup>1</sup>University of California, Los Angeles</span>
-            <span class="univerity-block"><sup>2</sup>University of Texas at Austin</span>
-            <span class="univerity-block"><sup>3</sup>DEVCOM ARL</span>
-          </div>
-
-          <div class="is-size-6 publication-authors">
-            <span class="author-block">*Denotes Equal Contribution</span>
-          </div> -->
-
-          <!-- <div class="is-size-4 publication-authors">
-            <span class="univerity-block"><b>CVPR 2024, Seattle</b></span>
-            <span class="univerity-block">CVPR 2024, Seattle</span>
-            <a href="https://cvpr.thecvf.com/">CVPR 2024, Seattle</a>
-          </div> -->
-
-          <!-- <div class="is-size-5 publication-authors">
-            <span class="univerity-block" style="color: rgb(169, 16, 151);">CVPR 2024, Seattle</span>
-          </div>
-
-          <div class="is-size-5 publication-authors">
-            <span class="univerity-block" style="color: rgb(252, 118, 0);"><b>✨ Highlight ✨</b> </span>
-          </div> -->
-          
-          <!-- <div class="is-size-5 publication-authors">
-            <span class="univerity-block" style="color: rgb(169, 16, 151);">CVPR 2024, Seattle</span>
-          </div> -->
-        
-          <!-- <div class="is-size-5 publication-authors">
-          <body>
-            <center>
-                <h1>
-                    <font color="#FF2626"><b>H</b></font>
-                    <font color="#252A34"><b>i</b></font>
-                    <font color="#753422"><b>g</b></font>
-                    <font color="#FFD523"><b>h</b></font>
-                    <font color="#71EFA3"><b>l</b></font>
-                    <font color="#0F52BA"><b>i</b></font>
-                    <font color="#66CC66"><b>g</b></font>
-                    <font color="#FF9966"><b>h</b></font>
-                    <font color="#FFCCCC"><b>t</b></font>
-                    <font color="#00C1D4">k</font>
-                    <font color="#EFE3D0">s</font>
-                </h1>
-            </center>
-          </body>
-          </div> -->
-        
-
-          <!-- <div class="column has-text-centered">
-            <div class="publication-links"> -->
-              <!-- PDF Link. -->
-              <!-- <span class="link-block">
-                <a href="https://arxiv.org/abs/2312.03203"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fas fa-file-pdf"></i>
-                  </span>
-                  <span>Paper</span>
-                </a>
-              </span> -->
-              <!-- Video Link. -->
-              <!-- <span class="link-block">
-                <a href="https://www.youtube.com/watch?v=h4zmQsCV_Qw"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-youtube"></i>
-                  </span>
-                  <span>Video</span>
-                </a>
-              </span> -->
-              <!-- Code Link. -->
-              <!-- <span class="link-block">
-                <a href="https://github.com/ShijieZhou-UCLA/feature-3dgs"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-github"></i>
-                  </span>
-                  <span>Code</span>
-                  </a>
-              </span>
-            </div> -->
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="hero teaser">
-  <div class="container_teaser is-max-desktop">
-    <div class="column_teaser">
-        <!-- First Slider -->
-        <div id="slider1-container_teaser">
-            <img-comparison-slider id="slider1">
-                <figure slot="first" class="before">
-                    <img height="100%" width="100%" src="./media/teaser/rgb1.gif">
-                    <figcaption>Radiance Field </figcaption>
-                </figure>
-                <figure slot="second" class="after" id="gif-2">
-                    <img height="100%" width="100%" src="./media/teaser/lseg.gif">
-                    <figcaption>Distilled Feature Field (LSeg)</figcaption>
-                </figure>
-            </img-comparison-slider>
-        </div>  
-
-        <!-- Second Slider, initially hidden -->
-        <!-- <div id="slider2-container_teaser" style="display: none;">
-            <img-comparison-slider id="slider2">
-                <figure slot="first" class="before" id="gif-3">
-                    <img height="100%" width="100%" src="./media/teaser/rgb2.gif">
-                    <figcaption>Radiance Field </figcaption>
-                </figure>
-                <figure slot="second" class="after" id="gif-4">
-                    <img height="100%" width="100%" src="./media/teaser/sam.gif">
-                    <figcaption>Distilled Feature Field (SAM)</figcaption>
-                </figure>
-            </img-comparison-slider>
-        </div>
-        <div class="button-container_teaser">
-          <div class="glow-button">
-              <button id="toggle-slider" onclick="toggleSliders()">Switch Feature Field 🪄</button>
-          </div>
-        </div> -->
-       
-        
-        <!-- <h2 class="subtitle has-text-centered">
-          LSM enables XXXXX the distillation of 3D feature fields from any 2D foundation models, using only 18 training views for this complex real-world scene.
-        </h2>         -->
-    </div>
-</div>
-
-    <!-- <div class="hero-body">
-      <video id="teaser" autoplay muted loop playsinline height="100%">
-        <source src="./static/videos/teaser.mp4"
-                type="video/mp4">
-      </video>
-      <h2 class="subtitle has-text-centered">
-        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into
-        free-viewpoint
-        portraits.
-      </h2>
-    </div>
-  </div> -->
-</section>
+    <!-- TL;DR -->
+    <!-- <h2><span style="color: #f06d15 ;font-weight: bolder;">TL;DR</span></h2>
+    <div class="alert alert-primary tldr mb-4">
+      LSM infers a 3D Gaussian scene from two input views in a single forward pass.
+    </div> -->
 
 
 
 
-<section class="section">
-  <div class="container is-max-desktop">
-    <!-- Abstract. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <!-- <h2>TL;DR</h2> -->
-        <!-- <h2 class="title is-3"><span style="color: #f06d15 ;font-weight: bolder;">TL;DR</span></h2> -->
-        <div class="summary-box">
-          <p>LSM infers a 3D Gaussian scene from two input views in a single forward pass.</p>
-      </div>
-        <div class="alert alert-primary tldr mb-4">
-          
-        </div>
 
-        <h2 class="title is-3"><span style="color: #f06d15 ;font-weight: bolder;">Abstract</span></h2>
-        <div class="content has-text-justified">
-          <p>
-            Conventional 3D vision systems interpret the 3D world from unstructured image collections in three stages: (i) estimation of camera parameters; (ii) inference of 3D representations; and (iii) prediction of semantics for downstream tasks. Despite the development of extensive data-driven approaches to enhance each stage independently, few have addressed these challenges within an integrated end-to-end framework. In this paper, we introduce the Large Scene Model (LSM), which directly predicts a set of anisotropic 3D Gaussians, encompassing versatile attributes for <strong>appearance, and semantics</strong>. During the inference stage, LSM processes a pair of stereo images without the assumption of known camera poses, and can decode scenes in real-time that previously unseen. The LSM architecture is based on a standard transformer model, efficiently aggregating cross-view and cross-modal information through attention mechanisms. Initially, LSM processes patchified input images and predicts pixel-aligned point maps at a normalized scale, jointly for the input images. To compile a detailed point-based representation, we integrate local feature propagation using subtraction-form vector attention and incorporate low-level encoder features. Addressing the scarcity of labeled 3D semantic data, and to facilitate scene manipulation via natural language, we propose the integration of semantic priors from a well-pre-trained language-driven 2D model into the 3D representation. At the core of LSM is a hierarchical feature fusion through cross-modal attention, which is employed to propagate and aggregate any tokenized features into multi-scale, point-based  feature representations. Our approach not only provides a direct semantic 3D model but also seamlessly predicts geometry, RGB, and semantic maps from new viewpoints, thereby facilitating downstream applications that require 3D information in various formats.
-          </p>
-          
-          <div class="columns is-centered has-text-centered">
-            <div class="column is-four-fifths">
-              <h2 class="title is-3"><span style="color: #f06d15 ;font-weight: bolder;">Video</span></h2>
-              <div class="publication-video">
-                <iframe src="https://www.youtube.com/embed/h4zmQsCV_Qw?si=Bd1LWETR_c8Uxarf"
-                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+
+
+
+
+
+
+    <!-- <section class="section">
+      <div class="container is-max-desktop">
+        Abstract.
+         <div class="columns is-centered has-text-centered"> -->
+
+    
+            <!-- <h2 class="title is-3"><span style="color: #f06d15 ;font-weight: bolder;">Abstract</span></h2>
+            <div class="content has-text-justified">
+              <p>
+                Conventional 3D vision systems interpret the 3D world from unstructured image collections in three stages: (i) estimation of camera parameters; (ii) inference of 3D representations; and (iii) prediction of semantics for downstream tasks. Despite the development of extensive data-driven approaches to enhance each stage independently, few have addressed these challenges within an integrated end-to-end framework. In this paper, we introduce the Large Scene Model (LSM), which directly predicts a set of anisotropic 3D Gaussians, encompassing versatile attributes for <strong>appearance, and semantics</strong>. During the inference stage, LSM processes a pair of stereo images without the assumption of known camera poses, and can decode scenes in real-time that previously unseen. The LSM architecture is based on a standard transformer model, efficiently aggregating cross-view and cross-modal information through attention mechanisms. Initially, LSM processes patchified input images and predicts pixel-aligned point maps at a normalized scale, jointly for the input images. To compile a detailed point-based representation, we integrate local feature propagation using subtraction-form vector attention and incorporate low-level encoder features. Addressing the scarcity of labeled 3D semantic data, and to facilitate scene manipulation via natural language, we propose the integration of semantic priors from a well-pre-trained language-driven 2D model into the 3D representation. At the core of LSM is a hierarchical feature fusion through cross-modal attention, which is employed to propagate and aggregate any tokenized features into multi-scale, point-based  feature representations. Our approach not only provides a direct semantic 3D model but also seamlessly predicts geometry, RGB, and semantic maps from new viewpoints, thereby facilitating downstream applications that require 3D information in various formats.
+              </p>
+              
+              <div class="columns is-centered has-text-centered">
+                
               </div>
             </div>
           </div>
-          <!--/ Paper video. -->
         </div>
-      </div>
-    </div>
-    <!--/ Abstract. -->
+      </div> -->
+    <!-- </section> -->
 
-    <!-- Pipeline. -->
-    <!-- <h3 class="title is-4">Methodology</h3>
-    <div class="content has-text-justified">
-      <p>
-      </p>
-    </div>
+
+
     <div class="columns is-centered has-text-centered">
-      <div class="column">
-        <img src="./media/pipeline.png"
-             class="interpolation-image"
-             alt="Interpolate start reference image."/>
-        <p>...</p>
-      </div>
-    </div> -->
-    <!--/ Pipeline. -->
-  </div>
-</section>
 
 
-<section class="section">
-  <div class="container is-max-desktop">
+
+    <!-- Abstract -->
+    <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Abstract</span></h2>
+    <div class="content has-text-justified">
+    <p>
+    <!-- </div><p class="mb-4"> -->
+      A classical problem in computer vision is to reconstruct and understand the 3D structure from a limited number of images to accurately interpret and export geometry, appearance, and semantics. Traditional approaches typically decompose this objective into multiple subtasks, involving several stages of complicated mapping among different data representations. For instance, dense reconstruction through Structure-from-Motion (SfM) requires transforming a set of multi-view images into key points and camera parameters before estimating structures. 3D understanding relies on a lengthy reconstruction pipeline before inputting into data- and task-specific neural networks. This paradigm can result in extensive processing times and substantial engineering efforts for processing each scene.
+      </p>
+      <p>
+      In this work, we introduce the Large Scene Model (LSM), a point-based representation that directly processes unposed RGB images into semantic 3D. This new model simultaneously infers geometry, appearance, and semantics within a scene, and synthesizes versatile label maps at novel views, all in a single feed-forward pass. To represent the scene, we employ a generic Transformer-based framework that integrates global geometry by pixel-aligned point maps. To facilitate scene attributes regression, we adopt local context aggregation with multi-scale fusion tailored for enhanced prediction accuracy. Addressing the scarcity of labeled 3D semantic data and enhancing scene manipulation capabilities via natural language, we incorporate a well-trained 2D model into a 3D consistent semantic feature field. An efficient decoder parameterizes a set of anisotropic Gaussians, enabling the rendering of scene attributes at novel views. Supervised end-to-end learning and comprehensive experiments on various tasks demonstrate that LSM can unify multiple 3D vision tasks. It achieves both real-time reconstruction and rendering speeds and outperforms state-of-the-art baselines.
+    </p>
+    
+
+    <!-- Method -->
+    <!-- <h2><span style="color: #f06d15 ;font-weight: bolder;">Method</span></h2> -->
     <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Method Overview</span></h2>
+    
     <div class="content has-text-justified">
-      <div class="columns is-centered">
-        <figure class="image is-centered">
-          <img src="./media/pipeline/arc.png" alt="Pipeline Image">
-        </figure>
-      </div>
+      <img src="static/images/method_overview.png" class="img-fluid w-100 mt-2 mb-3" alt="comparison on ACID dataset" />
       <p>
-        <strong>We illustrate the architecture for training LSM in Fig~\ref{fig:arc}, where the input consists of stereo image pairs and associated camera poses $\{ (\boldsymbol{I}_i \in \mathbb{R}^{H \times W \times 3}), (\boldsymbol{P}_i \in \mathbb{R}^{3 \times 4}) \}_{i=1}^{2}$. To enhance model efficiency, the initial scene geometry is constructed using a standard Transformer architecture~\cite{dosovitskiy2020image} with cross-attention between input views and dense prediction heads are then employed to regress normalized point maps $\{ \boldsymbol{D}_i  \in \mathbb{R}^{H \times W \times 3} \}_{i=1}^{2}$ (Sec.~\ref{sec:coarse}). 
+        We illustrate the architecture for training LSM in Fig~\ref{fig:arc}, where the input consists of stereo image pairs and associated camera poses $\{ (\boldsymbol{I}_i \in \mathbb{R}^{H \times W \times 3}), (\boldsymbol{P}_i \in \mathbb{R}^{3 \times 4}) \}_{i=1}^{2}$. To enhance model efficiency, the initial scene geometry is constructed using a standard Transformer architecture~\cite{dosovitskiy2020image} with cross-attention between input views and dense prediction heads are then employed to regress normalized point maps $\{ \boldsymbol{D}_i  \in \mathbb{R}^{H \times W \times 3} \}_{i=1}^{2}$ (Sec.~\ref{sec:coarse}). 
         To enable fine-grained point-wise prediction of scene representation, and facilitate the lifting of generic feature fields from 2D pre-trained vision models, substraction-based attention with learnable positional encoding are applied in a local window to propagate features from neighboring points (Sec.~\ref{sec:fine}), and thus amalgamate encoded features with rich semantics (Sec.~\ref{sec:fine}) with the capacity to lift 2D pre-trained model (Sec.~\ref{sec:lift}) at multi-scale. 
         New views with feature fields can be decoded using splatting~\cite{kerbl20233d} on the target poses(Sec.~\ref{sec:decode}). During inference stage, normalized point maps can be directly predicted where the renderer take the camera parameters calculated based on point maps. <br> <br>
       </p>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Visual Comparisons</span></h2>
-    <div class="content has-text-justified">
-      <div class="columns is-centered">
-        <figure class="image is-centered">
-          <img src="./media/pipeline/arc.png" alt="Pipeline Image">
-        </figure>
-      </div>
-      <p>
-        <strong>We illustrate the architecture for training LSM in Fig~\ref{fig:arc}, where the input consists of stereo image pairs and associated camera poses $\{ (\boldsymbol{I}_i \in \mathbb{R}^{H \times W \times 3}), (\boldsymbol{P}_i \in \mathbb{R}^{3 \times 4}) \}_{i=1}^{2}$. To enhance model efficiency, the initial scene geometry is constructed using a standard Transformer architecture~\cite{dosovitskiy2020image} with cross-attention between input views and dense prediction heads are then employed to regress normalized point maps $\{ \boldsymbol{D}_i  \in \mathbb{R}^{H \times W \times 3} \}_{i=1}^{2}$ (Sec.~\ref{sec:coarse}). 
-        To enable fine-grained point-wise prediction of scene representation, and facilitate the lifting of generic feature fields from 2D pre-trained vision models, substraction-based attention with learnable positional encoding are applied in a local window to propagate features from neighboring points (Sec.~\ref{sec:fine}), and thus amalgamate encoded features with rich semantics (Sec.~\ref{sec:fine}) with the capacity to lift 2D pre-trained model (Sec.~\ref{sec:lift}) at multi-scale. 
-        New views with feature fields can be decoded using splatting~\cite{kerbl20233d} on the target poses(Sec.~\ref{sec:decode}). During inference stage, normalized point maps can be directly predicted where the renderer take the camera parameters calculated based on point maps. <br> <br>
-      </p>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container is-max-desktop">
-    <h3 class="title is-3">3D Semantic Scene Understanding</h3>
-    <div class="content has-text-justified">
-    <p>
-      Feature 3DGS empowers pixel-wise semantic scene understanding from any novel view, even with unseen labels, by mapping semantically 
-      close labels to similar regions in the embedding space of 2D foundation models. <br> 
-    </p>
-    </div>
-    <div class="columns is-centered">
-
-      <div class="column">
-        <h2 class="title is-6">Synthetic Scene</h2>
-        <div>
-          <img-comparison-slider>
-            <figure slot="first" class="before">
-              <img width="100%" src="./media/semantic_seg/scene_1_rgb.gif">
-            </figure>
-            <figure slot="second" class="after">
-              <img width="100%" src="./media/semantic_seg/scene_1_seg.gif">
-          </img-comparison-slider>
-        </div>
-      </div>
-
-      <div class="column">
-        <h2 class="title is-6">Real Scene</h2>
-        <div>
-          <img-comparison-slider>
-            <figure slot="first" class="before">
-              <img width="100%" src="./media/semantic_seg/scene_2_rgb.gif">
-            </figure>
-            <figure slot="second" class="after">
-              <img width="100%" src="./media/semantic_seg/scene_2_seg.gif">
-          </img-comparison-slider>
-        </div>
-      </div>
-
-      
-      <!--/ Matting. -->
-    <!-- </div>
-    <div class="columns is-centered"> -->
-
-      <!-- <div class="column">
-        <h2 class="title is-6">Rearrange</h2>
-        <div class="columns is-centered">
-          <div class="column content">
-            <video id="matting-video" autoplay controls muted loop playsinline height="100%">
-              <source src="./media/editing/edit_scene_rearrange.mp4"
-              type="video/mp4">
-            </video>
-          </div>
-        </div>
-      </div>
-
-      <div class="column">
-        <h2 class="title is-6">Editing</h2>
-        <div class="columns is-centered">
-          <div class="column content">
-            <video id="matting-video" autoplay controls muted loop playsinline height="100%">
-              <source src="./media/editing/edit_scene_editing.mp4"
-              type="video/mp4">
-            </video>
-          </div>
-        </div>
-      </div> -->
-
-      
-      <!--/ Matting. -->
-    </div>
-    <div class="content has-text-justified">
-      <p>
-        <i>Experience sync issues with the GIFs? Simply refresh the webpage to synchronize playback.</i>
-      </p>
-    </div>
-
-    <style>
-      .before,
-      .after {
-        margin: 0;
-      }
-    
-      .before figcaption,
-      .after figcaption {
-        background: #fff;
-        border: 1px solid #c0c0c0;
-        border-radius: 4px;
-        color: #2e3452;
-        opacity: 0.8;
-        padding: 4px;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        line-height: 100%;
-      }
-    
-      .before figcaption {
-        left: 4px;
-      }
-    
-      .after figcaption {
-        right: 4px;
-      }
-    </style>
-  </div>
-</section>
-
-
-
-
-
-<section class="section">
-  <div class="container is-max-desktop">
-    <h3 class="title is-3">Language-guided Editing</h3>
-    <div class="content has-text-justified">
-    <p>
-      The nature of explicit scene representation, coupled with feature fields, enables precise geometry and appearance editing 
-      in 3D for any real-world scene prompted by natural language. <br> 
-    </p>
-    </div>
-    <div class="columns is-centered">
-
-      <div class="column">
-        <h2 class="title is-6">Delete the car</h2>
-        <div>
-          <img-comparison-slider>
-            <figure slot="first" class="before">
-              <img width="100%" src="./media/language_editing/deletion/deletion_rgb.gif">
-            </figure>
-            <figure slot="second" class="after">
-              <img width="100%" src="./media/language_editing/deletion/deletion.gif">
-          </img-comparison-slider>
-        </div>
-      </div>
-
-      <div class="column">
-        <h2 class="title is-6">Extract the banana</h2>
-        <div>
-          <img-comparison-slider>
-            <figure slot="first" class="before">
-              <img width="100%" src="./media/language_editing/extraction/extraction_rgb.gif">
-            </figure>
-            <figure slot="second" class="after">
-              <img width="100%" src="./media/language_editing/extraction/extraction.gif">
-          </img-comparison-slider>
-        </div>
-      </div>
-      
-      <div class="column">
-        <h2 class="title is-6">Change leaves color</h2>
-        <div>
-          <img-comparison-slider>
-            <figure slot="first" class="before">
-              <img width="100%" src="./media/language_editing/color_changing/color_change_rgb_0.gif">
-            </figure>
-            <figure slot="second" class="after">
-              <img width="100%" src="./media/language_editing/color_changing/color_change_0.gif">
-          </img-comparison-slider>
-        </div>
-      </div>
-
-      <div class="column">
-        <h2 class="title is-6">Change sidewalk color</h2>
-        <div>
-          <img-comparison-slider>
-            <figure slot="first" class="before">
-              <img width="100%" src="./media/language_editing/color_changing/color_change_rgb_1_2.gif">
-            </figure>
-            <figure slot="second" class="after">
-              <img width="100%" src="./media/language_editing/color_changing/color_change_1.gif">
-          </img-comparison-slider>
-        </div>
-      </div>
-      
-      <!--/ Matting. -->
-    </div>
-    <div class="content has-text-justified">
-      <p>
-        <i>Experience sync issues with the GIFs? Simply refresh the webpage to synchronize playback.</i>
-      </p>
-    </div>
-
-    <style>
-      .before,
-      .after {
-        margin: 0;
-      }
-    
-      .before figcaption,
-      .after figcaption {
-        background: #fff;
-        border: 1px solid #c0c0c0;
-        border-radius: 4px;
-        color: #2e3452;
-        opacity: 0.8;
-        padding: 4px;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        line-height: 100%;
-      }
-    
-      .before figcaption {
-        left: 4px;
-      }
-    
-      .after figcaption {
-        right: 4px;
-      }
-    </style>
-  </div>
-</section>   
-
-
-
-
-<section class="section">
-    <div class="container is-max-desktop">
-    <h3 class="title is-3">Segment Anything from Any View</h3>
-    <div class="content has-text-justified">
-    <p>
-      To segment anything in a 3D scene, a few training view images is all you need. 
-      We seamlessly integrate the latest computer vision foundation model, Segment Anything Model (SAM), 
-      into the novel view synthesis pipeline through feature field distillation. This integration enables swift and precise 
-      responses without invoking the original SAM workflow. <br>
-    </p>
-    </div>
-    <!-- <div class="columns is-centered"> -->
-      <!-- Visual Effects. -->
-      <!-- <div class="column">
-        <div class="content">
-          <h2 class="title is-6">Segment by Point</h2>
-          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
-            <source src="./media/sam/teatime_point.mp4"
-            type="video/mp4">
-          </video>
-        </div>
-      </div> -->
-      <!--/ Visual Effects. -->
-
-      <!-- Matting. -->
-      <!-- <div class="column">
-        <h2 class="title is-6">Segment by Box</h2>
-        <div class="columns is-centered">
-          <div class="column content">
-            <video id="matting-video" autoplay controls muted loop playsinline height="100%">
-              <source src="./media/sam/teatime_box.mp4"
-              type="video/mp4">
-            </video>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="column">
-        <h2 class="title is-6">Segment Everything</h2>
-        <div class="columns is-centered">
-          <div class="column content">
-            <video id="matting-video" autoplay controls muted loop playsinline height="100%">
-              <source src="./media/sam/teatime_all.mp4"
-              type="video/mp4">
-            </video>
-          </div>
-
-        </div>
-      </div> -->
+    <!-- </div> -->
+    <!-- <p class="mb-4">
+      We introduce pixelSplat, a feed-forward model that learns to reconstruct 3D radiance fields parameterized
+      by 3D Gaussian primitives from pairs of images. Our model features real-time and memory-efficient
+      rendering for scalable training as well as fast 3D reconstruction at inference time. To overcome local
+      minima inherent to sparse and locally supported representations, we predict a dense probability
+      distribution over 3D and sample Gaussian means from that probability distribution. We make this sampling
+      operation differentiable via a reparameterization trick, allowing us to back-propagate gradients through
+      the Gaussian splatting representation. We benchmark our method on wide-baseline novel view synthesis on
+      the real-world RealEstate10k and ACID datasets, where we outperform state-of-the-art light field
+      transformers and accelerate rendering by 2.5 orders of magnitude while reconstructing an interpretable and
+      editable 3D radiance field.
+    </p> -->
 
     
+    <!-- Comparisons -->
+    <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Results</span></h2>
+    <!-- <p>We compare our method against the following baselines:</p>
+    <ul>
+      <li><a href="https://yilundu.github.io/wide_baseline/">Feature-3DGS</a>: A light field renderer
+        designed for wide-baseline novel view synthesis.</li>
+      <li><a href="https://mohammedsuhail.net/gen_patch_neural_rendering/">NeRF-DFF</a>: A light field transformer which
+        struggles with only two input views.</li>
+      <li><a href="https://alexyu.net/pixelnerf/">PixelSplat</a>: A well-known NeRF-based approach which struggles on
+        scene-scale datasets because it does not handle scale ambiguity.</li>
+    </ul> -->
 
-
-      
-      <!--/ Matting. -->
+    <h3>ScanNet Dataset</h3>
+    <img src="static/images/suppl1.png" class="img-fluid w-100 mt-2 mb-3" alt="comparison on ACID dataset" />
+    <div class="border w-100 mb-4">
+      <video class="w-100 d-block" autoplay controls muted loop>
+        <source src="static/videos/output_acid.mp4" type="video/mp4">
+      </video>
     </div>
 
-    <style>
-      .before,
-      .after {
-        margin: 0;
-      }
-    
-      .before figcaption,
-      .after figcaption {
-        background: #fff;
-        border: 1px solid #c0c0c0;
-        border-radius: 4px;
-        color: #2e3452;
-        opacity: 0.8;
-        padding: 4px;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        line-height: 100%;
-      }
-    
-      .before figcaption {
-        left: 4px;
-      }
-    
-      .after figcaption {
-        right: 4px;
-      }
-    </style>
-  </div>
-</section>
+    <!-- <h3>Real Estate 10k Dataset</h3>
+    <img src="static/images/comparison_re10k.svg" class="img-fluid w-100 mt-2 mb-3" alt="comparison on ACID dataset" />
+    <div class="border w-100 mb-4">
+      <video class="w-100 d-block" autoplay controls muted loop>
+        <source src="static/videos/output_re10k.mp4" type="video/mp4">
+      </video>
+    </div> -->
 
+    <!-- Point Clouds -->
+    <!-- <h2>3D Gaussian Point Clouds</h2>
+    <p>Because pixelSplat infers a set of 3D Gaussians, we can visualize these Gaussians and render them to produce
+      depth maps. Since the Real Estate 10k and ACID datasets contain many areas with ambiguous depth (e.g., large,
+      textureless surfaces like interior walls), we fine-tune pixelSplat for 50,000 iterations using a depth regularizer
+      before exporting 3D Gaussian point clouds.</p>
+    <img src="static/images/point_clouds.svg" class="img-fluid w-100 mt-2 mb-3" alt="point clouds and depth maps" /> -->
 
+    <!-- <p>Use the interactive 3D viewer below to explore a set of 3D Gaussians generated by pixelSplat. However, note that the renderings produced by the interactive Spline viewer do not exactly match those produced by the original CUDA-based implementation of 3D Gaussian splatting.</p>
+    <iframe src='https://my.spline.design/untitled-56829706657b783ffda8a7682085e706/' frameborder='0' width='100%' height='400px'></iframe> -->
 
-
-
-
-  </div>
-</section>
-
-
-<!-- <section class="section" id="BibTeX">
-  <div class="container is-max-desktop content">
-    <h2 class="title">BibTeX</h2>
-    <pre><code>@article{zhou2023feature,
-  author    = {Zhou, Shijie and Chang, Haoran and Jiang, Sicheng and Fan, Zhiwen and Zhu, Zehao and Xu, Dejia and Chari, Pradyumna and You, Suya and Wang, Zhangyang and Kadambi, Achuta},
-  title     = {Feature 3DGS: Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields},
-  journal   = {arXiv preprint arXiv:2312.03203},
-  year      = {2023},
-}</code></pre>
+    <!-- Footer -->
+    <footer class="border-top mt-5 py-4">
+      <!-- This page's code uses elements from this <a href="https://github.com/eliahuhorwitz/Academic-project-page-template"
+        target="_blank">Academic Project Page
+        Template</a>.
+    </footer>
   </div> -->
-<!-- </section> -->
-
-
-<footer class="footer">
-  <div class="container">
-    <div class="content has-text-centered">
-      <a class="icon-link"
-         href="">
-        <i class="fas fa-file-pdf"></i>
-      </a>
-      <a class="icon-link" href="" class="external-link" disabled>
-        <i class="fab fa-github"></i>
-      </a>
-    </div>
-    <div class="columns is-centered">
-      <div class="column is-8">
-        <div class="content">
-          <p>
-            Source code borrowed from <a
-              href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<script>
-  function toggleSliders() {
-      // Get both slider containers
-      var slider1 = document.getElementById("slider1-container_teaser");
-      var slider2 = document.getElementById("slider2-container_teaser");
-
-      // Toggle visibility
-      if (slider1.style.display === "none") {
-          slider1.style.display = "block";
-          slider2.style.display = "none";
-      } else {
-          slider1.style.display = "none";
-          slider2.style.display = "block";
-      }
-  }
-</script>
-
 </body>
+
 </html>
