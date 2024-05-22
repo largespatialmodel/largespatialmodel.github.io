@@ -84,7 +84,21 @@
     .after {
       margin: 0;
     }
-  
+
+    .summary-box {
+    background-color: #ffb682; /* Light blue background */
+    /* border-left: 5px solid #2b8af7; Dark blue left border */
+    padding: 10px;
+    margin: 10px 0;
+    font-family: Arial, sans-serif;
+    border-radius: 5px; /* Rounds the corners */
+    border: 2px solid #FFA500; /* Fine orange border */
+    }
+
+    p {
+        margin: 0;
+        color: #333; /* Dark text for better readability */
+    }
     .before figcaption,
     .after figcaption {
       background: #fff;
@@ -401,10 +415,10 @@
                     <figcaption>Distilled Feature Field (LSeg)</figcaption>
                 </figure>
             </img-comparison-slider>
-        </div>
+        </div>  
 
         <!-- Second Slider, initially hidden -->
-        <div id="slider2-container_teaser" style="display: none;">
+        <!-- <div id="slider2-container_teaser" style="display: none;">
             <img-comparison-slider id="slider2">
                 <figure slot="first" class="before" id="gif-3">
                     <img height="100%" width="100%" src="./media/teaser/rgb2.gif">
@@ -420,10 +434,12 @@
           <div class="glow-button">
               <button id="toggle-slider" onclick="toggleSliders()">Switch Feature Field 🪄</button>
           </div>
-      </div>
-        <h2 class="subtitle has-text-centered">
+        </div> -->
+       
+        
+        <!-- <h2 class="subtitle has-text-centered">
           LSM enables XXXXX the distillation of 3D feature fields from any 2D foundation models, using only 18 training views for this complex real-world scene.
-        </h2>        
+        </h2>         -->
     </div>
 </div>
 
@@ -449,6 +465,15 @@
     <!-- Abstract. -->
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
+        <!-- <h2>TL;DR</h2> -->
+        <!-- <h2 class="title is-3"><span style="color: #f06d15 ;font-weight: bolder;">TL;DR</span></h2> -->
+        <div class="summary-box">
+          <p>LSM infers a 3D Gaussian scene from two input views in a single forward pass.</p>
+      </div>
+        <div class="alert alert-primary tldr mb-4">
+          
+        </div>
+
         <h2 class="title is-3"><span style="color: #f06d15 ;font-weight: bolder;">Abstract</span></h2>
         <div class="content has-text-justified">
           <p>
@@ -491,7 +516,7 @@
 
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Method</span></h2>
+    <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Method Overview</span></h2>
     <div class="content has-text-justified">
       <div class="columns is-centered">
         <figure class="image is-centered">
@@ -499,7 +524,7 @@
         </figure>
       </div>
       <p>
-        <strong>Overall Framework of LSM</strong>. We illustrate the architecture for training LSM in Fig~\ref{fig:arc}, where the input consists of stereo image pairs and associated camera poses $\{ (\boldsymbol{I}_i \in \mathbb{R}^{H \times W \times 3}), (\boldsymbol{P}_i \in \mathbb{R}^{3 \times 4}) \}_{i=1}^{2}$. To enhance model efficiency, the initial scene geometry is constructed using a standard Transformer architecture~\cite{dosovitskiy2020image} with cross-attention between input views and dense prediction heads are then employed to regress normalized point maps $\{ \boldsymbol{D}_i  \in \mathbb{R}^{H \times W \times 3} \}_{i=1}^{2}$ (Sec.~\ref{sec:coarse}). 
+        <strong>We illustrate the architecture for training LSM in Fig~\ref{fig:arc}, where the input consists of stereo image pairs and associated camera poses $\{ (\boldsymbol{I}_i \in \mathbb{R}^{H \times W \times 3}), (\boldsymbol{P}_i \in \mathbb{R}^{3 \times 4}) \}_{i=1}^{2}$. To enhance model efficiency, the initial scene geometry is constructed using a standard Transformer architecture~\cite{dosovitskiy2020image} with cross-attention between input views and dense prediction heads are then employed to regress normalized point maps $\{ \boldsymbol{D}_i  \in \mathbb{R}^{H \times W \times 3} \}_{i=1}^{2}$ (Sec.~\ref{sec:coarse}). 
         To enable fine-grained point-wise prediction of scene representation, and facilitate the lifting of generic feature fields from 2D pre-trained vision models, substraction-based attention with learnable positional encoding are applied in a local window to propagate features from neighboring points (Sec.~\ref{sec:fine}), and thus amalgamate encoded features with rich semantics (Sec.~\ref{sec:fine}) with the capacity to lift 2D pre-trained model (Sec.~\ref{sec:lift}) at multi-scale. 
         New views with feature fields can be decoded using splatting~\cite{kerbl20233d} on the target poses(Sec.~\ref{sec:decode}). During inference stage, normalized point maps can be directly predicted where the renderer take the camera parameters calculated based on point maps. <br> <br>
       </p>
@@ -507,6 +532,23 @@
   </div>
 </section>
 
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Visual Comparisons</span></h2>
+    <div class="content has-text-justified">
+      <div class="columns is-centered">
+        <figure class="image is-centered">
+          <img src="./media/pipeline/arc.png" alt="Pipeline Image">
+        </figure>
+      </div>
+      <p>
+        <strong>We illustrate the architecture for training LSM in Fig~\ref{fig:arc}, where the input consists of stereo image pairs and associated camera poses $\{ (\boldsymbol{I}_i \in \mathbb{R}^{H \times W \times 3}), (\boldsymbol{P}_i \in \mathbb{R}^{3 \times 4}) \}_{i=1}^{2}$. To enhance model efficiency, the initial scene geometry is constructed using a standard Transformer architecture~\cite{dosovitskiy2020image} with cross-attention between input views and dense prediction heads are then employed to regress normalized point maps $\{ \boldsymbol{D}_i  \in \mathbb{R}^{H \times W \times 3} \}_{i=1}^{2}$ (Sec.~\ref{sec:coarse}). 
+        To enable fine-grained point-wise prediction of scene representation, and facilitate the lifting of generic feature fields from 2D pre-trained vision models, substraction-based attention with learnable positional encoding are applied in a local window to propagate features from neighboring points (Sec.~\ref{sec:fine}), and thus amalgamate encoded features with rich semantics (Sec.~\ref{sec:fine}) with the capacity to lift 2D pre-trained model (Sec.~\ref{sec:lift}) at multi-scale. 
+        New views with feature fields can be decoded using splatting~\cite{kerbl20233d} on the target poses(Sec.~\ref{sec:decode}). During inference stage, normalized point maps can be directly predicted where the renderer take the camera parameters calculated based on point maps. <br> <br>
+      </p>
+    </div>
+  </div>
+</section>
 
 <section class="section">
   <div class="container is-max-desktop">
@@ -734,9 +776,9 @@
       responses without invoking the original SAM workflow. <br>
     </p>
     </div>
-    <div class="columns is-centered">
+    <!-- <div class="columns is-centered"> -->
       <!-- Visual Effects. -->
-      <div class="column">
+      <!-- <div class="column">
         <div class="content">
           <h2 class="title is-6">Segment by Point</h2>
           <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
@@ -744,11 +786,11 @@
             type="video/mp4">
           </video>
         </div>
-      </div>
+      </div> -->
       <!--/ Visual Effects. -->
 
       <!-- Matting. -->
-      <div class="column">
+      <!-- <div class="column">
         <h2 class="title is-6">Segment by Box</h2>
         <div class="columns is-centered">
           <div class="column content">
@@ -772,7 +814,7 @@
           </div>
 
         </div>
-      </div>
+      </div> -->
 
     
 
@@ -821,7 +863,7 @@
 </section>
 
 
-<section class="section" id="BibTeX">
+<!-- <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
     <h2 class="title">BibTeX</h2>
     <pre><code>@article{zhou2023feature,
@@ -830,8 +872,8 @@
   journal   = {arXiv preprint arXiv:2312.03203},
   year      = {2023},
 }</code></pre>
-  </div>
-</section>
+  </div> -->
+<!-- </section> -->
 
 
 <footer class="footer">
