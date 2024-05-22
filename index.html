@@ -6,11 +6,11 @@
   <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
   <!-- Replace the content tag with appropriate information -->
   <meta name="description"
-    content="We introduce pixelSplat, a feed-forward model that learns to reconstruct 3D radiance fields parameterized by 3D Gaussian primitives from pairs of images.">
+    content="We introduce LargeSceneModel, which utilizes two unposed and uncalibrated images as input, and reconstructs the explicit radiance field, encompassing geometry, appearance, and semantics in real-time.">
   <meta property="og:title" content="Large Scene Model: Real-time Unposed Images to Semantic 3D" />
   <meta property="og:description" content="Novel view synthesis via feed-forward 3D Gaussian inference from two images." />
-  <meta property="og:url" content="https://pixelsplat.github.io/" />
-  <meta property="og:image" content="https://pixelsplat.github.io/static/images/banner.png" />
+  <!-- <meta property="og:url" content="https://pixelsplat.github.io/" />
+  <meta property="og:image" content="https://pixelsplat.github.io/static/images/banner.png" /> -->
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
@@ -83,48 +83,10 @@
 <body>
   <div class="container">
     <!-- Title -->
-    <!-- <h1 class="pt-5 title">pixelSplat: 3D Gaussian Splats from Image Pairs for Scalable
-      Generalizable 3D Reconstruction</h1> -->
       <h1 class="pt-5 title"><span style="color: #ff7512;font-weight: bolder;">L</span>arge<span style="color: #ff7512;font-weight: bolder;">S</span>cene<span style="color: #ff7512;font-weight: bolder;">M</span>odel: Real-time Unposed Images to Semantic 3D</h1>
     <div class="d-flex flex-row justify-content-center">
       <a>Anonymous Authors</a>
     </div>
-
-
-
-    <!-- <div class="w-100 d-flex flex-row justify-content-center mt-4 gap-2"> -->
-      <!-- Paper PDF -->
-      <!-- <a href="https://arxiv.org/abs/2312.12337" target="_blank" class="btn btn-dark" role="button">
-        <span class="icon">
-          <i class="ai ai-arxiv"></i>
-        </span>
-        <span>Paper</span>
-      </a> -->
-
-      <!-- Code -->
-      <!-- <a href="https://github.com/dcharatan/pixelsplat" target="_blank" class="btn btn-dark" role="button">
-        <span class="icon">
-          <i class="fab fa-github"></i>
-        </span>
-        <span>Code</span>
-      </a> -->
-
-      <!-- Pre-trained Models -->
-      <!-- <a href="https://drive.google.com/drive/folders/18nGNWIn8RN0aEWLR6MC2mshAkx2uN6fL?usp=sharing" target="_blank" class="btn btn-dark" role="button">
-        <span class="icon">
-          <i class="fas fa-database"></i>
-        </span>
-        <span>Pre-trained Models</span>
-      </a> -->
-
-      <!-- Sample Data -->
-      <!-- <a href="https://drive.google.com/drive/folders/1joiezNCyQK2BvWMnfwHJpm2V77c7iYGe?usp=sharing" target="_blank" class="btn btn-dark" role="button">
-        <span class="icon">
-          <i class="fas fa-database"></i>
-        </span>
-        <span>Sample Data</span>
-      </a>
-    </div> -->
 
     <!-- Teaser -->
     <div class="w-100 my-4">
@@ -138,54 +100,25 @@
       </div>
     </div>
 
-    <!-- TL;DR -->
-    <!-- <h2><span style="color: #f06d15 ;font-weight: bolder;">TL;DR</span></h2>
-    <div class="alert alert-primary tldr mb-4">
-      LSM infers a 3D Gaussian scene from two input views in a single forward pass.
-    </div> -->
 
 
-
-
-    <!-- <section class="section">
-      <div class="container is-max-desktop">
-        Abstract.
-         <div class="columns is-centered has-text-centered"> -->
-
-    
-            <!-- <h2 class="title is-3"><span style="color: #f06d15 ;font-weight: bolder;">Abstract</span></h2>
-            <div class="content has-text-justified">
-              <p>
-                Conventional 3D vision systems interpret the 3D world from unstructured image collections in three stages: (i) estimation of camera parameters; (ii) inference of 3D representations; and (iii) prediction of semantics for downstream tasks. Despite the development of extensive data-driven approaches to enhance each stage independently, few have addressed these challenges within an integrated end-to-end framework. In this paper, we introduce the Large Scene Model (LSM), which directly predicts a set of anisotropic 3D Gaussians, encompassing versatile attributes for <strong>appearance, and semantics</strong>. During the inference stage, LSM processes a pair of stereo images without the assumption of known camera poses, and can decode scenes in real-time that previously unseen. The LSM architecture is based on a standard transformer model, efficiently aggregating cross-view and cross-modal information through attention mechanisms. Initially, LSM processes patchified input images and predicts pixel-aligned point maps at a normalized scale, jointly for the input images. To compile a detailed point-based representation, we integrate local feature propagation using subtraction-form vector attention and incorporate low-level encoder features. Addressing the scarcity of labeled 3D semantic data, and to facilitate scene manipulation via natural language, we propose the integration of semantic priors from a well-pre-trained language-driven 2D model into the 3D representation. At the core of LSM is a hierarchical feature fusion through cross-modal attention, which is employed to propagate and aggregate any tokenized features into multi-scale, point-based  feature representations. Our approach not only provides a direct semantic 3D model but also seamlessly predicts geometry, RGB, and semantic maps from new viewpoints, thereby facilitating downstream applications that require 3D information in various formats.
-              </p>
-              
-              <div class="columns is-centered has-text-centered">
-                
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> -->
     <!-- </section> -->
     <div class="columns is-centered has-text-centered">
-
-
     <!-- Abstract -->
     <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Abstract</span></h2>
     <div class="content has-text-justified">
-    <p>
-    <!-- </div><p class="mb-4"> -->
-      A classical problem in computer vision is to reconstruct and understand the 3D structure from a limited number of images to accurately interpret and export geometry, appearance, and semantics. Traditional approaches typically decompose this objective into multiple subtasks, involving several stages of complicated mapping among different data representations. For instance, dense reconstruction through Structure-from-Motion (SfM) requires transforming a set of multi-view images into key points and camera parameters before estimating structures. 3D understanding relies on a lengthy reconstruction pipeline before inputting into data- and task-specific neural networks. This paradigm can result in extensive processing times and substantial engineering efforts for processing each scene.
-      </p>
-      <br>
       <p>
-      In this work, we introduce the Large Scene Model (LSM), a point-based representation that directly processes unposed RGB images into semantic 3D. This new model simultaneously infers geometry, appearance, and semantics within a scene, and synthesizes versatile label maps at novel views, all in a single feed-forward pass. To represent the scene, we employ a generic Transformer-based framework that integrates global geometry by pixel-aligned point maps. To facilitate scene attributes regression, we adopt local context aggregation with multi-scale fusion tailored for enhanced prediction accuracy. Addressing the scarcity of labeled 3D semantic data and enhancing scene manipulation capabilities via natural language, we incorporate a well-trained 2D model into a 3D consistent semantic feature field. An efficient decoder parameterizes a set of anisotropic Gaussians, enabling the rendering of scene attributes at novel views. Supervised end-to-end learning and comprehensive experiments on various tasks demonstrate that LSM can unify multiple 3D vision tasks. It achieves both real-time reconstruction and rendering speeds and outperforms state-of-the-art baselines.
-    </p>
+      <!-- </div><p class="mb-4"> -->
+        A classical problem in computer vision is to reconstruct and understand the 3D structure from a limited number of images to accurately interpret and export geometry, appearance, and semantics. Traditional approaches typically decompose this objective into multiple subtasks, involving several stages of complicated mapping among different data representations. For instance, dense reconstruction through Structure-from-Motion (SfM) requires transforming a set of multi-view images into key points and camera parameters before estimating structures. 3D understanding relies on a lengthy reconstruction pipeline before inputting into data- and task-specific neural networks. This paradigm can result in extensive processing times and substantial engineering efforts for processing each scene.
+        </p>
+        <br>
+        <p>
+        In this work, we introduce the Large Scene Model (LSM), a point-based representation that directly processes unposed RGB images into semantic 3D. This new model simultaneously infers geometry, appearance, and semantics within a scene, and synthesizes versatile label maps at novel views, all in a single feed-forward pass. To represent the scene, we employ a generic Transformer-based framework that integrates global geometry by pixel-aligned point maps. To facilitate scene attributes regression, we adopt local context aggregation with multi-scale fusion tailored for enhanced prediction accuracy. Addressing the scarcity of labeled 3D semantic data and enhancing scene manipulation capabilities via natural language, we incorporate a well-trained 2D model into a 3D consistent semantic feature field. An efficient decoder parameterizes a set of anisotropic Gaussians, enabling the rendering of scene attributes at novel views. Supervised end-to-end learning and comprehensive experiments on various tasks demonstrate that LSM can unify multiple 3D vision tasks. It achieves both real-time reconstruction and rendering speeds and outperforms state-of-the-art baselines.
+      </p>
     
 
     <!-- Method -->
-    <!-- <h2><span style="color: #f06d15 ;font-weight: bolder;">Method</span></h2> -->
-    <br></br>
+    <br>
     <h2 class="title is-3 has-text-centered"><span style="color: #f06d15 ;font-weight: bolder;">Method Overview</span></h2>
     
     <div class="content has-text-justified">
@@ -194,19 +127,7 @@
         Our method utilizes input images from which pixel-aligned point maps are regressed using a generic Transformer. Point-based scene parameters are then predicted employing another Transformer that facilitates local context aggregation and hierarchical fusion. The model elevate 2D pre-trained feature to facilate consistent 3D feature field. It is supervised end-to-end, minimizing the loss function through comparisons against ground truth and rasterized feature maps on new views. During the inference stage, our approach is capable of predicting the scene representation without requiring camera parameters, enabling real-time semantic 3D reconstruction.<br> <br>
       </p>
       </div>
-    <!-- </div> -->
-    <!-- <p class="mb-4">
-      We introduce pixelSplat, a feed-forward model that learns to reconstruct 3D radiance fields parameterized
-      by 3D Gaussian primitives from pairs of images. Our model features real-time and memory-efficient
-      rendering for scalable training as well as fast 3D reconstruction at inference time. To overcome local
-      minima inherent to sparse and locally supported representations, we predict a dense probability
-      distribution over 3D and sample Gaussian means from that probability distribution. We make this sampling
-      operation differentiable via a reparameterization trick, allowing us to back-propagate gradients through
-      the Gaussian splatting representation. We benchmark our method on wide-baseline novel view synthesis on
-      the real-world RealEstate10k and ACID datasets, where we outperform state-of-the-art light field
-      transformers and accelerate rendering by 2.5 orders of magnitude while reconstructing an interpretable and
-      editable 3D radiance field.
-    </p> -->
+
 
     
     <!-- Comparisons -->
@@ -252,8 +173,7 @@
       </div>
 
       <div class="column">
-        <!-- <h2 class="title is-6">Rearrange</h2> -->
-        <br
+        <br>
         <div class="columns is-centered">
           <div class="column content">
             <video id="matting-video" autoplay controls muted loop playsinline width="19%">
@@ -280,30 +200,6 @@
         </div>
       </div>
 
-
-    
-
-    
-      
-
-    <!-- <h3>Real Estate 10k Dataset</h3>
-    <img src="static/images/comparison_re10k.svg" class="img-fluid w-100 mt-2 mb-3" alt="comparison on ACID dataset" />
-    <div class="border w-100 mb-4">
-      <video class="w-100 d-block" autoplay controls muted loop>
-        <source src="static/videos/output_re10k.mp4" type="video/mp4">
-      </video>
-    </div> -->
-
-    <!-- Point Clouds -->
-    <!-- <h2>3D Gaussian Point Clouds</h2>
-    <p>Because pixelSplat infers a set of 3D Gaussians, we can visualize these Gaussians and render them to produce
-      depth maps. Since the Real Estate 10k and ACID datasets contain many areas with ambiguous depth (e.g., large,
-      textureless surfaces like interior walls), we fine-tune pixelSplat for 50,000 iterations using a depth regularizer
-      before exporting 3D Gaussian point clouds.</p>
-    <img src="static/images/point_clouds.svg" class="img-fluid w-100 mt-2 mb-3" alt="point clouds and depth maps" /> -->
-
-    <!-- <p>Use the interactive 3D viewer below to explore a set of 3D Gaussians generated by pixelSplat. However, note that the renderings produced by the interactive Spline viewer do not exactly match those produced by the original CUDA-based implementation of 3D Gaussian splatting.</p>
-    <iframe src='https://my.spline.design/untitled-56829706657b783ffda8a7682085e706/' frameborder='0' width='100%' height='400px'></iframe> -->
 
     <!-- Footer -->
     <footer class="border-top mt-5 py-4">
