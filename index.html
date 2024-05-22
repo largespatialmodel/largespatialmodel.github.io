@@ -36,6 +36,50 @@
   <script src="static/js/bootstrap.bundle.min.js"></script>
 </head>
 
+<style>
+  .before,
+  .after {
+    margin: 0;
+  }
+
+  .summary-box {
+  background-color: #FDC976; /* Light blue background */
+  /* border-left: 5px solid #2b8af7; Dark blue left border */
+  padding: 20px;
+  margin: 10px 0;
+  font-family: Arial, sans-serif;
+  border-radius: 5px; /* Rounds the corners */
+  border: 2px solid #FAFCB8; /* Fine orange border */
+  }
+
+  p {
+      margin: 0;
+      color: #333; /* Dark text for better readability */
+  }
+  .before figcaption,
+  .after figcaption {
+    background: #fff;
+    border: 1px solid #c0c0c0;
+    border-radius: 4px;
+    color: #2e3452;
+    opacity: 0.8;
+    padding: 4px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 70%;
+  }
+
+  .before figcaption {
+    left: 4px;
+  }
+
+  .after figcaption {
+    right: 4px;
+  }
+</style>
+
+
 <body>
   <div class="container">
     <!-- Title -->
@@ -88,7 +132,8 @@
       <!-- <video class="w-100 d-block" autoplay controls muted loop>
         <source src="static/videos/teaser.mp4" type="video/mp4">
       </video> -->
-      <div class="alert alert-primary tldr mb-4">
+      <div class="summary-box tldr mb-4">
+      <!-- <div class="alert alert-primary tldr mb-4"> -->
         <strong>TL;DR</strong>: LSM utilizes two unposed and uncalibrated images as input, and reconstructs the explicit radiance field, encompassing geometry, appearance, and semantics in real-time.
       </div>
     </div>
