@@ -14,7 +14,7 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
-  <meta name="twitter:title" content="Large Scene Model: Real-time Unposed Images to Semantic 3D">
+  <meta name="twitter:title" content="Large Spatial Model: Real-time Unposed Images to Semantic 3D">
   <meta name="twitter:description" content="Novel view synthesis via feed-forward 3D Gaussian inference from two images.">
   <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
   <!-- <meta name="twitter:image" content="https://pixelsplat.github.io/static/images/banner.png"> -->
@@ -83,9 +83,47 @@
 <body>
   <div class="container">
     <!-- Title -->
-      <h1 class="pt-5 title"><span style="color: #ff7512;font-weight: bolder;">L</span>arge<span style="color: #ff7512;font-weight: bolder;">S</span>cene<span style="color: #ff7512;font-weight: bolder;">M</span>odel: Real-time Unposed Images to Semantic 3D</h1>
-    <div class="d-flex flex-row justify-content-center">
+      <h1 class="pt-5 title"><span style="color: #ff7512;font-weight: bolder;">L</span>arge<span style="color: #ff7512;font-weight: bolder;">S</span>patial<span style="color: #ff7512;font-weight: bolder;">M</span>odel: Real-time Unposed Images to Semantic 3D</h1>
+    <!-- <div class="d-flex flex-row justify-content-center">
       <a>Anonymous Authors</a>
+    </div> -->
+    <div class="mb-2" style="font-size: medium; text-align: center;">
+      <span class="author-block">
+        <a href="https://zhiwenfan.github.io/">Zhiwen Fan</a><sup>1,2</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://haofeixu.github.io/">Jian Zhang</a><sup>3</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://wenyancong.com/">Wenyan Cong</a><sup>1</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://peihaowang.github.io/">Peihao Wang</a><sup>1</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://largespatialmodel.github.io/">Renjie Li</a><sup>4</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://x.com/KairunWen">Kairun Wen</a><sup>3</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://shijiezhou-ucla.github.io/#-services">Shijie Zhou</a><sup>5</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://www.ee.ucla.edu/achuta-kadambi/">Achuta Kadambi</a><sup>5</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://vita-group.github.io/research.html">Zhangyang Wang</a><sup>6</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://faculty.cc.gatech.edu/~danfei/">Danfei Xu</a><sup>6</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://www.borisivanovic.com/">Boris Ivanovic</a><sup>6</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://web.stanford.edu/~pavone/">Marco Pavone</a><sup>6</sup></span>,&nbsp;
+      <span class="author-block">
+        <a href="https://yuewang.xyz/">Yue Wang</a><sup>1</sup></span>
+    </div>
+    <div class="mb-4" style="text-align: center;">
+      <span><sup>1</sup>UT Austin</span>,&nbsp;
+      <span><sup>2</sup>Nvidia Research</span>,&nbsp;
+      <span><sup>3</sup>Xiamen University</span>,&nbsp;
+      <span><sup>4</sup>Tsinghua University</span>,&nbsp;<br>
+      <span><sup>5</sup>UCLA</span>,&nbsp;
+      <span><sup>6</sup>GaTech</span>,&nbsp;
+      <span><sup>7</sup>Stanford University</span>,&nbsp;
+      <span><sup>8</sup>USC</span>
     </div>
 
     <!-- Teaser -->
@@ -113,7 +151,7 @@
         </p>
         <br>
         <p>
-        In this work, we introduce the Large Scene Model (LSM), a point-based representation that directly processes unposed RGB images into semantic 3D. This new model simultaneously infers geometry, appearance, and semantics within a scene, and synthesizes versatile label maps at novel views, all in a single feed-forward pass. To represent the scene, we employ a generic Transformer-based framework that integrates global geometry by pixel-aligned point maps. To facilitate scene attributes regression, we adopt local context aggregation with multi-scale fusion tailored for enhanced prediction accuracy. Addressing the scarcity of labeled 3D semantic data and enhancing scene manipulation capabilities via natural language, we incorporate a well-trained 2D model into a 3D consistent semantic feature field. An efficient decoder parameterizes a set of anisotropic Gaussians, enabling the rendering of scene attributes at novel views. Supervised end-to-end learning and comprehensive experiments on various tasks demonstrate that LSM can unify multiple 3D vision tasks. It achieves both real-time reconstruction and rendering speeds and outperforms state-of-the-art baselines.
+        In this work, we introduce the Large Spatial Model (LSM), a point-based representation that directly processes unposed RGB images into semantic 3D. This new model simultaneously infers geometry, appearance, and semantics within a scene, and synthesizes versatile label maps at novel views, all in a single feed-forward pass. To represent the scene, we employ a generic Transformer-based framework that integrates global geometry by pixel-aligned point maps. To facilitate scene attributes regression, we adopt local context aggregation with multi-scale fusion tailored for enhanced prediction accuracy. Addressing the scarcity of labeled 3D semantic data and enhancing scene manipulation capabilities via natural language, we incorporate a well-trained 2D model into a 3D consistent semantic feature field. An efficient decoder parameterizes a set of anisotropic Gaussians, enabling the rendering of scene attributes at novel views. Supervised end-to-end learning and comprehensive experiments on various tasks demonstrate that LSM can unify multiple 3D vision tasks. It achieves both real-time reconstruction and rendering speeds and outperforms state-of-the-art baselines.
       </p>
     
 
