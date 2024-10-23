@@ -14,7 +14,7 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
-  <meta name="twitter:title" content="Large Spatial Model: Real-time Unposed Images to Semantic 3D">
+  <meta name="twitter:title" content="Large Spatial Model: Real-time Unposed Images to Semantic 3D">/home/wkr/workspace/website/largespatialmodel.github.io
   <meta name="twitter:description" content="Novel view synthesis via feed-forward 3D Gaussian inference from two images.">
   <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
   <!-- <meta name="twitter:image" content="https://pixelsplat.github.io/static/images/banner.png"> -->
@@ -118,7 +118,7 @@
     <div class="mb-4" style="text-align: center;">
       <span><sup>1</sup>UT Austin</span>,&nbsp;
       <span><sup>2</sup>Nvidia Research</span>,&nbsp;
-      <span><sup>3</sup>Xiamen University</span>,&nbsp;
+      <span><sup>3</sup>XMU</span>,&nbsp;
       <span><sup>4</sup>TAMU</span>,&nbsp;<br>
       <span><sup>5</sup>UCLA</span>,&nbsp;
       <span><sup>6</sup>GaTech</span>,&nbsp;
@@ -171,11 +171,32 @@
     <div class="content has-text-justified">
       <p>
       <!-- </div><p class="mb-4"> -->
-        A classical problem in computer vision is to reconstruct and understand the 3D structure from a limited number of images to accurately interpret and export geometry, appearance, and semantics. Traditional approaches typically decompose this objective into multiple subtasks, involving several stages of complicated mapping among different data representations. For instance, dense reconstruction through Structure-from-Motion (SfM) requires transforming a set of multi-view images into key points and camera parameters before estimating structures. 3D understanding relies on a lengthy reconstruction pipeline before inputting into data- and task-specific neural networks. This paradigm can result in extensive processing times and substantial engineering efforts for processing each scene.
+        Reconstructing and understanding 3D structures from a limited number of im-
+ages is a classical problem in computer vision. Traditional approaches typically
+decompose this task into multiple subtasks, involving several stages of complex
+mappings between different data representations. For example, dense reconstruc-
+tion using Structure-from-Motion (SfM) requires transforming images into key
+points, optimizing camera parameters, and estimating structures. Following this,
+accurate sparse reconstructions are necessary for further dense modeling, which is
+then input into task-specific neural networks. This multi-stage paradigm leads to
+significant processing times and engineering complexity
         </p>
         <br>
         <p>
-        In this work, we introduce the Large Spatial Model (LSM), a point-based representation that directly processes unposed RGB images into semantic 3D. This new model simultaneously infers geometry, appearance, and semantics within a scene, and synthesizes versatile label maps at novel views, all in a single feed-forward pass. To represent the scene, we employ a generic Transformer-based framework that integrates global geometry by pixel-aligned point maps. To facilitate scene attributes regression, we adopt local context aggregation with multi-scale fusion tailored for enhanced prediction accuracy. Addressing the scarcity of labeled 3D semantic data and enhancing scene manipulation capabilities via natural language, we incorporate a well-trained 2D model into a 3D consistent semantic feature field. An efficient decoder parameterizes a set of anisotropic Gaussians, enabling the rendering of scene attributes at novel views. Supervised end-to-end learning and comprehensive experiments on various tasks demonstrate that LSM can unify multiple 3D vision tasks. It achieves both real-time reconstruction and rendering speeds and outperforms state-of-the-art baselines.
+          In this work, we introduce the <em>Large Spatial Model</em> (<strong>LSM</strong>), which directly pro-
+          cesses unposed RGB images into semantic radiance fields. LSM simultaneously
+          estimates geometry, appearance, and semantics in a single feed-forward pass and
+          can synthesize versatile label maps by interacting through language at novel views.
+          Built on a general Transformer-based framework, LSM integrates global geometry
+          via pixel-aligned point maps. To improve spatial attribute regression, we adopt
+          local context aggregation with multi-scale fusion, enhancing the accuracy of fine
+          local details. To address the scarcity of labeled 3D semantic data and enable natural
+          language-driven scene manipulation, we incorporate a pre-trained 2D language-
+          based segmentation model into a 3D-consistent semantic feature field. An efficient
+          decoder parameterizes a set of semantic anisotropic Gaussians, allowing supervised
+          end-to-end learning. Comprehensive experiments on various tasks demonstrate
+          that LSM unifies multiple 3D vision tasks directly from unposed images, achieving
+          real-time semantic 3D reconstruction for the first time.
       </p>
     
 
